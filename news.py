@@ -121,7 +121,7 @@ if st.button("Search News"):
 
 # Source filter (shows up after first search)
 if st.session_state.sources_list:
-    st.subheader("Filter by Source")
+    # st.subheader("Filter by Source")
     st.session_state.selected_sources = st.multiselect(
         "Select news sources to display", 
         options=st.session_state.sources_list,
