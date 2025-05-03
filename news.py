@@ -45,6 +45,42 @@ st.markdown("""
         margin-top: 10px;
         margin-bottom: 20px;
     }
+    /* Metrics row styling */
+    .metrics-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 15px;
+    }
+    .metric-box {
+        flex: 1;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        color: white;
+    }
+    .metric-positive {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    }
+    .metric-neutral {
+        background: linear-gradient(135deg, #78909C, #455A64);
+    }
+    .metric-negative {
+        background: linear-gradient(135deg, #F44336, #C62828);
+    }
+    .metric-total {
+        background: linear-gradient(135deg, #3F51B5, #1A237E);
+    }
+    .metric-value {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .metric-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }        
     </style>
 """, unsafe_allow_html=True)
 
@@ -261,15 +297,38 @@ if not st.session_state.df.empty:
     # ===================== Charts Section =====================
     st.subheader("Overall Tone Summary")
 
-    # 1. Total Count
+    # 1. Total Count with improved aesthetics
     total_articles = len(display_df)
     counts = display_df['sentiment'].value_counts().reindex(['Positive', 'Neutral', 'Negative'], fill_value=0)
-
-    col_pos, col_neu, col_neg = st.columns(3)
-    col_pos.metric("Positive", counts['Positive'])
-    col_neu.metric("Neutral", counts['Neutral'])
-    col_neg.metric("Negative", counts['Negative'])
-    st.markdown(f"**Total Articles:** {total_articles}")
+    
+    # Create beautiful metric boxes in one row
+    metric_html = """
+    <div class="metrics-container">
+        <div class="metric-box metric-positive">
+            <div class="metric-value">{positive}</div>
+            <div class="metric-label">Positive</div>
+        </div>
+        <div class="metric-box metric-neutral">
+            <div class="metric-value">{neutral}</div>
+            <div class="metric-label">Neutral</div>
+        </div>
+        <div class="metric-box metric-negative">
+            <div class="metric-value">{negative}</div>
+            <div class="metric-label">Negative</div>
+        </div>
+        <div class="metric-box metric-total">
+            <div class="metric-value">{total}</div>
+            <div class="metric-label">Total Articles</div>
+        </div>
+    </div>
+    """.format(
+        positive=counts['Positive'],
+        neutral=counts['Neutral'],
+        negative=counts['Negative'],
+        total=total_articles
+    )
+    
+    st.markdown(metric_html, unsafe_allow_html=True)
 
     # 2. Pie Chart (Interactive)
     pie_fig = px.pie(
