@@ -111,24 +111,35 @@ if 'button_key' not in st.session_state:
 
 # Function to clean Google News links
 def clean_url(url):
+    """
+    Clean URLs by replacing URL-encoded characters and removing Google tracking parameters.
+    
+    Parameters:
+    url (str): The URL to clean
+    
+    Returns:
+    str: The cleaned URL
+    """
     if not url:
         return ""
     
-    # Handle YouTube links
-    youtube_match = re.search(r'youtube.com/watch%3Fv%3D([^&]+)', url)
+    # Replace common URL encoded characters
+    url = url.replace('%3F', '?')
+    url = url.replace('%3D', '=')
+    url = url.replace('%26', '&')
+    
+    # Handle YouTube links specifically
+    youtube_match = re.search(r'youtube.com/watch\?v=([^&]+)', url)
     if youtube_match:
         video_id = youtube_match.group(1)
-        # Replace %26 with & for any YouTube parameters
-        video_id = video_id.replace('%26', '&')
         return f"https://www.youtube.com/watch?v={video_id}"
     
-    # Handle regular links - remove &ved and everything after it
+    # Handle regular links - remove &ved and everything after it (Google tracking parameter)
     if '&ved=' in url:
         clean_link = url.split('&ved=')[0]
         return clean_link
     
     return url
-
 # Function to reset when new search is performed
 def reset_search_state():
     st.session_state.current_page = 1
