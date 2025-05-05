@@ -12,7 +12,7 @@ nltk.download('punkt')
 
 st.set_page_config(page_title="Showtime News Search & Analysis", layout="wide")
 
-# Custom CSS
+# Custom CSS (unchanged from original)
 st.markdown("""
     <style>
     .news-table {
@@ -103,13 +103,12 @@ if 'df' not in st.session_state:
     st.session_state.df = pd.DataFrame()
 if 'has_searched' not in st.session_state:
     st.session_state.has_searched = False
-# New session state flag to trigger the load more functionality only when the button is clicked
 if 'load_more_clicked' not in st.session_state:
     st.session_state.load_more_clicked = False
 if 'button_key' not in st.session_state:
-    st.session_state.button_key = 0  # Used to create unique button keys
+    st.session_state.button_key = 0  
+    # Used to create unique button keys
 
-# Function to clean Google News links
 def clean_url(url):
     """
     Clean URLs by replacing URL-encoded characters and removing Google tracking parameters.
@@ -140,6 +139,7 @@ def clean_url(url):
         return clean_link
     
     return url
+
 # Function to reset when new search is performed
 def reset_search_state():
     st.session_state.current_page = 1
@@ -152,24 +152,57 @@ def reset_search_state():
 
 # Header - Inputs
 st.subheader("Search Filters")
+
+# Create a layout for the inputs
 col1, col2, col3 = st.columns([3, 2, 2])
+
 with col1:
     query = st.text_input("Enter search keyword", "Dharavi Redevelopment")
+
+# Define time period options
 with col2:
-    start_date = st.date_input("Start date", datetime(2025, 1, 1))
+    period_options = {
+        "Last 1 hour": "1h", 
+        "Last 6 hours": "6h",
+        "Last 12 hours": "12h",
+        "Last 1 day": "1d", 
+        "Last 3 days": "3d",
+        "Last 7 days": "7d", 
+        "Last 1 month": "1m", 
+        "Last 3 months": "3m",
+        "Last 6 months": "6m", 
+        "Last 1 year": "1y"
+    }
+    period = st.selectbox("Select time period", list(period_options.keys()), index=5)  # Default to 7 days
+    period_value = period_options[period]
+
+# Add language selection
 with col3:
-    end_date = st.date_input("End date", datetime(2025, 4, 29))
+    language_options = {
+        'English': 'en',
+        'Marathi': 'mr',
+        'Hindi': 'hi',
+        'Bengali': 'bn', 
+        'Tamil': 'ta', 
+        'Telugu': 'te', 
+        'Malayalam': 'ml'
+    }
+    language = st.selectbox("Language", list(language_options.keys()))
+    lang = language_options[language]
 
-lang = "en"
-region = "IN"
+# Set region to India
+region = "IN"  # Fixed to India
 
-# Search button - moved above Source filter
+# Search button
 if st.button("Search News"):
     reset_search_state()
     
     with st.spinner(f"Fetching news from page {st.session_state.current_page}..."):
         st.session_state.googlenews = GoogleNews(lang=lang, region=region)
-        st.session_state.googlenews.set_time_range(start_date.strftime('%m/%d/%Y'), end_date.strftime('%m/%d/%Y'))
+        
+        # Set period
+        st.session_state.googlenews.set_period(period_value)
+        
         st.session_state.googlenews.search(query)
         
         # Get first page
